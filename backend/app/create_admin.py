@@ -1,3 +1,6 @@
+import logging
+import os
+from collections.abc import Mapping
 from getpass import getpass
 
 from sqlalchemy import select
@@ -8,6 +11,8 @@ from app.core.permissions import Role
 from app.core.security import password_is_strong
 from app.models import User
 from app.services.accounts import create_user
+
+log = logging.getLogger("school")
 
 
 def create_first_super_admin(db: Session, username: str, full_name: str, password: str) -> User:
@@ -25,6 +30,29 @@ def create_first_super_admin(db: Session, username: str, full_name: str, passwor
     )
     db.commit()
     return user
+
+
+def bootstrap_super_admin_from_environment(
+    db: Session, environ: Mapping[str, str] | None = None
+) -> bool:
+    env = os.environ if environ is None else environ
+    username = env.get("INITIAL_ADMIN_USERNAME")
+    full_name = env.get("INITIAL_ADMIN_FULL_NAME")
+    password = env.get("INITIAL_ADMIN_PASSWORD")
+    if username is None and full_name is None and password is None:
+        return False
+    if not username or not full_name or not password:
+        raise RuntimeError("Set all three INITIAL_ADMIN_* environment variables to bootstrap the first admin.")
+    if db.scalar(select(User.id).limit(1)) is not None:
+        log.warning("Initial admin bootstrap skipped because users already exist. Remove INITIAL_ADMIN_* variables.")
+        return False
+
+    user = create_first_super_admin(db, username, full_name, password)
+    log.warning(
+        "Initial super admin '%s' created. Remove INITIAL_ADMIN_* variables from the service environment.",
+        user.username,
+    )
+    return True
 
 
 def main() -> None:

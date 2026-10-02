@@ -63,6 +63,14 @@ python -m app.create_admin
 
 Enter the initial super admin username, name, and password when prompted. Password input is hidden. This command refuses to run if the configured database already contains any users; it does not reset or modify existing accounts. Use the same production database configured for the running backend.
 
+If your hosting plan does not include a Shell, add these temporary environment variables to the backend service instead:
+
+- `INITIAL_ADMIN_USERNAME`
+- `INITIAL_ADMIN_FULL_NAME`
+- `INITIAL_ADMIN_PASSWORD`
+
+Deploy or restart the backend. On startup, it creates the super admin only when the users table is empty and logs a confirmation without printing the password. Remove all three variables from the service environment after creation, then redeploy. Never put these credentials in GitHub. If users already exist, automatic setup is skipped; it does not modify existing accounts.
+
 ## Checks
 
 Run backend tests from `backend/`:

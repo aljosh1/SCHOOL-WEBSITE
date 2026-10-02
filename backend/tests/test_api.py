@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import select
 
 from app.core.db import SessionLocal
-from app.create_admin import create_first_super_admin
+from app.create_admin import bootstrap_super_admin_from_environment, create_first_super_admin
 from app.models import AuditLog, ResultAccessCode, User
 from tests.conftest import PASSWORD, login
 
@@ -50,6 +50,27 @@ def test_first_super_admin_bootstrap_creates_login(client):
 
     response = client.post("/api/auth/login", json={"username": "first-admin", "password": "StrongPass123"})
     assert response.status_code == 200
+
+
+def test_environment_bootstrap_creates_admin_only_for_empty_database():
+    env = {
+        "INITIAL_ADMIN_USERNAME": "first-admin",
+        "INITIAL_ADMIN_FULL_NAME": "First Admin",
+        "INITIAL_ADMIN_PASSWORD": "StrongPass123",
+    }
+    with SessionLocal() as db:
+        assert bootstrap_super_admin_from_environment(db, env) is False
+        db.query(User).delete()
+        db.commit()
+        assert bootstrap_super_admin_from_environment(db, env) is True
+        assert bootstrap_super_admin_from_environment(db, env) is False
+        assert db.scalars(select(User).where(User.username == "first-admin")).one().role == "SUPER_ADMIN"
+
+
+def test_environment_bootstrap_requires_all_values():
+    with SessionLocal() as db:
+        with pytest.raises(RuntimeError, match="Set all three"):
+            bootstrap_super_admin_from_environment(db, {"INITIAL_ADMIN_USERNAME": "first-admin"})
 
 
 def test_role_permissions(client, admin, superadmin, school):

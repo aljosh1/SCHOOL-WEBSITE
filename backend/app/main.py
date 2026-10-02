@@ -33,6 +33,7 @@ log = logging.getLogger("school")
 
 def bootstrap_defaults() -> None:
     """Ensures singleton rows required by the app exist."""
+    from app.create_admin import bootstrap_super_admin_from_environment
     from app.models import GradingScale
     from app.services.access import get_school
     from app.services.grading import install_default_scale
@@ -41,6 +42,7 @@ def bootstrap_defaults() -> None:
         get_school(db)
         if not db.scalars(select(GradingScale.id).limit(1)).first():
             install_default_scale(db)
+        bootstrap_super_admin_from_environment(db)
         db.commit()
 
 
