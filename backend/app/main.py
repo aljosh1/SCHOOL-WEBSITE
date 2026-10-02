@@ -64,12 +64,23 @@ def create_app() -> FastAPI:
         openapi_url=None if settings.is_production else "/openapi.json",
     )
     app.add_middleware(GZipMiddleware, minimum_size=1024)
+
+    # Allowed origin origins list merging system settings with exact deployment domains
+    allowed_origins = list(
+        {
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "https://school-website-mauve-one.vercel.app",
+            *getattr(settings, "cors_list", []),
+        }
+    )
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_list,
-        allow_credentials=False,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type"],
+        allow_origins=allowed_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
         max_age=600,
     )
 
