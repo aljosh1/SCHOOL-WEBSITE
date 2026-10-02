@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import select
 
 from app.core.db import SessionLocal
+from app.create_admin import create_first_super_admin
 from app.models import AuditLog, ResultAccessCode, User
 from tests.conftest import PASSWORD, login
 
@@ -31,6 +32,24 @@ def test_passwords_are_hashed(client, admin):
     with SessionLocal() as db:
         u = db.scalars(select(User).where(User.username == "admin")).one()
         assert u.password_hash.startswith("$argon2") and PASSWORD not in u.password_hash
+
+
+def test_first_super_admin_bootstrap_requires_empty_users_table():
+    with SessionLocal() as db:
+        with pytest.raises(RuntimeError, match="users table is not empty"):
+            create_first_super_admin(db, "first-admin", "First Admin", "StrongPass123")
+
+
+def test_first_super_admin_bootstrap_creates_login(client):
+    with SessionLocal() as db:
+        db.query(User).delete()
+        db.commit()
+        user = create_first_super_admin(db, "first-admin", "First Admin", "StrongPass123")
+        assert user.role == "SUPER_ADMIN"
+        assert user.is_demo is False
+
+    response = client.post("/api/auth/login", json={"username": "first-admin", "password": "StrongPass123"})
+    assert response.status_code == 200
 
 
 def test_role_permissions(client, admin, superadmin, school):

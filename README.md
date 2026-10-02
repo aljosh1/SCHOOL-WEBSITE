@@ -53,6 +53,16 @@ python -m app.seed
 
 This creates clearly labelled demo school data and demo accounts. Use it only with a development database; the seed script refuses to run when `ENVIRONMENT=production`. Running it with `--reset` drops and recreates the configured database.
 
+## Initial Production Admin
+
+After deploying the backend, open its Shell (for example, the Render service Shell). From the backend application directory, run:
+
+```sh
+python -m app.create_admin
+```
+
+Enter the initial super admin username, name, and password when prompted. Password input is hidden. This command refuses to run if the configured database already contains any users; it does not reset or modify existing accounts. Use the same production database configured for the running backend.
+
 ## Checks
 
 Run backend tests from `backend/`:
