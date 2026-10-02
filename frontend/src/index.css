@@ -1,0 +1,81 @@
+@import "tailwindcss";
+@import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource-variable/fraunces";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces Variable", Georgia, "Times New Roman", serif;
+
+  /* Brand colours are overwritten at runtime from the school's settings. */
+  --color-brand-50: #f1f8f3;
+  --color-brand-100: #dcefe2;
+  --color-brand-200: #b5dcc1;
+  --color-brand-300: #84c299;
+  --color-brand-400: #4ea06b;
+  --color-brand-500: #2a7d4a;
+  --color-brand-600: #1c6a3b;
+  --color-brand-700: #14532d;
+  --color-brand-800: #104424;
+  --color-brand-900: #0b2f19;
+  --color-accent-50: #fef8ee;
+  --color-accent-100: #fcecd0;
+  --color-accent-200: #f8d79f;
+  --color-accent-300: #f2bb67;
+  --color-accent-400: #e99a35;
+  --color-accent-500: #d27d1a;
+  --color-accent-600: #b45309;
+  --color-accent-700: #92400e;
+  --color-accent-800: #6f310d;
+  --color-accent-900: #4a2108;
+
+  --color-paper: #faf8f3;
+  --color-ink: #1b2420;
+  --color-muted: #5d6a63;
+  --color-line: #e5e1d6;
+}
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    @apply bg-paper font-sans text-ink antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1, h2, h3 { @apply font-display tracking-tight; }
+  :focus-visible { @apply outline-2 outline-offset-2 outline-brand-600; }
+  ::selection { background: var(--color-brand-200); }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
+}
+
+@layer components {
+  .field-label { @apply mb-1.5 block text-sm font-semibold text-ink; }
+  .input {
+    @apply w-full rounded-lg border border-line bg-white px-3.5 py-2.5 text-[15px] text-ink shadow-xs outline-none transition placeholder:text-muted/60 focus:border-brand-500 focus:ring-3 focus:ring-brand-500/15 disabled:bg-stone-100 disabled:text-muted;
+  }
+  .card { @apply rounded-2xl border border-line bg-white shadow-xs; }
+  .th { @apply whitespace-nowrap px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-muted; }
+  .td { @apply px-4 py-3 align-middle text-sm; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #ece8dc 25%, #f5f2e9 37%, #ece8dc 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+@keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+/* Printing: only the element marked .print-area remains visible. */
+@page { size: A4; margin: 10mm; }
+@media print {
+  body { background: white !important; }
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  .print-area { box-shadow: none !important; border: none !important; }
+  .card { box-shadow: none; }
+  .scratch-card { break-inside: avoid; }
+  body.print-cards > #root { display: none !important; }
+  body.print-cards #print-cards { display: grid !important; }
+}
+.print-only { display: none; }
+#print-cards { display: none; }

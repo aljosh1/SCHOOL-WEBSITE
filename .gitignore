@@ -1,0 +1,38 @@
+# Environment files and secrets; keep example templates
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node and frontend build output
+node_modules/
+dist/
+*.tsbuildinfo
+npm-debug.log*
+
+# Local databases and generated backend files
+*.db
+*.sqlite
+*.sqlite3
+backend/storage/
+
+# Generated check output
+backend/test_out.txt
+frontend/build_out.txt
+frontend/tsc_out.txt
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
